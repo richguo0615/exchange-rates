@@ -8,6 +8,8 @@ import (
 //Buckets
 const ExchangeRate = "ExchangeRate"
 
+var Sto *Storage
+
 type Storage struct {
 	ExchangeRateBucket *ExchangeRateBucket
 }

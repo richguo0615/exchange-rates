@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/richguo0615/exchange-rates/api"
 	"github.com/richguo0615/exchange-rates/storage"
 	"log"
 )
@@ -19,11 +20,15 @@ func main() {
 		return
 	}
 
-	err = sto.ExchangeRateBucket.ForEach()
+	_, err = sto.ExchangeRateBucket.ForEach()
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
+
+	storage.Sto = sto
+
+	api.NewHandler()
 
 	defer db.Close()
 }

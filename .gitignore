@@ -11,3 +11,4 @@ frontend/yarn-error.log*
 frontend//test/unit/coverage/
 frontend//test/e2e/reports/
 frontend/selenium-debug.log
+frontend/src/assets/logo.png

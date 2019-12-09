@@ -62,12 +62,18 @@ func (b *ExchangeRateBucket) Save(key string, value string) error {
 	return err
 }
 
-func (b *ExchangeRateBucket) ForEach() error {
-	err := b.db.View(func(tx *bolt.Tx) error {
+func (b *ExchangeRateBucket) ForEach() (data []*models.ExchangeRate, err error) {
+	data = make([]*models.ExchangeRate, 0)
+	err = b.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(b.name))
 		if bucket != nil {
 			err := bucket.ForEach(func(k, v []byte) error {
-				fmt.Println(string(k), string(v))
+				//fmt.Println(string(k), string(v))
+
+				exRate := &models.ExchangeRate{}
+				utils.FromJson(string(v), exRate)
+
+				data = append(data, exRate)
 				return nil
 			})
 			if err != nil {
@@ -78,7 +84,7 @@ func (b *ExchangeRateBucket) ForEach() error {
 			err := errors.New(fmt.Sprint("can not find db: ", b.name))
 			return err
 		}
-		return  nil
+		return nil
 	})
-	return err
+	return data, err
 }
