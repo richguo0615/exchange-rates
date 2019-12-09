@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"github.com/asdine/storm"
 	"github.com/boltdb/bolt"
 	"log"
 )
@@ -14,8 +13,7 @@ type Storage struct {
 }
 
 func Init() (*bolt.DB, error) {
-	storm.Open("database.db")
-	db, err := bolt.Open("database.db", 0600, nil)
+	db, err := bolt.Open("storage/database.db", 0600, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,7 +36,7 @@ func NewStorage(db *bolt.DB) *Storage {
 	}
 
 	s := &Storage{
-		ExchangeRateBucket: NewExchangeRateBucket(db),
+		ExchangeRateBucket: NewExchangeRateBucket(ExchangeRate, db),
 	}
 
 	return s
