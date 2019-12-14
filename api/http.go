@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
 )
 
@@ -11,6 +12,7 @@ func NewHandler() {
 
 	api.HandleFunc("/exchangeRates", GetExchangeRates).Methods("GET")
 
+	log.Print("http listen port: 8080")
 	http.ListenAndServe(":8080", r)
 }
 
