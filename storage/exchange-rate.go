@@ -24,17 +24,18 @@ func NewExchangeRateBucket(name string, db *bolt.DB) *ExchangeRateBucket {
 func (b *ExchangeRateBucket) SetDefault() error {
 
 	keys := []string{
-		"USD", "CNY", "JPY", "SGD", "HKD", "EUR", "GBP",
+		"AUD", "CNY", "EUR", "GBP", "HKD", "JPY", "SGD", "USD",
 	}
 
 	defaultData := map[string]string{
-		keys[0]: utils.ToJson(models.NewExchangeRate("美元", "USD", 29.6000, "")),
-		keys[1]: utils.ToJson(models.NewExchangeRate("人民幣", "CNY", 4.1110, "")),
-		keys[2]: utils.ToJson(models.NewExchangeRate("日幣", "JPY", 0.2625, "")),
-		keys[3]: utils.ToJson(models.NewExchangeRate("新加坡", "SGD", 21.1070, "")),
-		keys[4]: utils.ToJson(models.NewExchangeRate("新加坡", "HKD", 3.6270, "")),
-		keys[5]: utils.ToJson(models.NewExchangeRate("新加坡", "EUR", 31.7960, "")),
-		keys[6]: utils.ToJson(models.NewExchangeRate("新加坡", "GBP", 36.9660, "")),
+		keys[0]: utils.ToJson(models.NewExchangeRate("澳幣", keys[0], 19.6100, "", 1)),
+		keys[1]: utils.ToJson(models.NewExchangeRate("人民幣", keys[1], 4.0500, "", 2)),
+		keys[2]: utils.ToJson(models.NewExchangeRate("歐元", keys[2], 31.6400, "", 3)),
+		keys[3]: utils.ToJson(models.NewExchangeRate("英鎊", keys[3], 36.8900, "", 4)),
+		keys[4]: utils.ToJson(models.NewExchangeRate("港幣", keys[4], 3.5900, "", 5)),
+		keys[5]: utils.ToJson(models.NewExchangeRate("日圓", keys[5], 0.2600, "", 6)),
+		keys[6]: utils.ToJson(models.NewExchangeRate("新加坡幣", keys[6], 20.9100, "", 7)),
+		keys[7]: utils.ToJson(models.NewExchangeRate("美金", keys[7], 29.6000, "", 8)),
 	}
 
 	for _, key := range keys {
@@ -87,4 +88,37 @@ func (b *ExchangeRateBucket) ForEach() (data []*models.ExchangeRate, err error) 
 		return nil
 	})
 	return data, err
+}
+
+func (b *ExchangeRateBucket) Update(data []*models.ExchangeRate) (err error) {
+	err = b.db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(b.name))
+		if bucket != nil {
+
+			for _, rate := range data {
+				if val := bucket.Get([]byte(rate.Currency)); val != nil {
+					exRate := models.ExchangeRate{}
+					utils.FromJson(string(val), &exRate)
+
+					if rate.Rate > 0 {
+						exRate.Rate = rate.Rate
+					}
+
+					if rate.Rate > 0 {
+						exRate.Rank = rate.Rank
+					}
+
+					err := bucket.Put([]byte(rate.Currency), []byte(utils.ToJson(exRate)))
+					if err != nil {
+						return err
+					}
+				}
+			}
+		} else {
+			err := errors.New(fmt.Sprint("can not find db: ", b.name))
+			return err
+		}
+		return nil
+	})
+	return err
 }
